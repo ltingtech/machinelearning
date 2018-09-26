@@ -2,6 +2,8 @@
 
 from math import log
 import operator
+import plotTree
+import pickle
 
 #给定数据集，计算香农熵
 def calcShannonEnt(dataset):
@@ -75,12 +77,18 @@ def chooseBestFeatureToSplitV2(dataset):
 	return bestFeatIdx
 
 def createDataset():
+	'''
 	dataset = [[1, 1, 'yes'],
 			[1, 1, 'yes'],
 			[1, 0, 'no'],
 			[0, 1, 'no'],
 			[0, 1, 'no']]
 	labels = ['no surfacing', 'flippers']
+	'''
+	fr = open('lenses.txt')
+	dataset = [strLine.strip().split('\t') for strLine in fr.readlines()]
+	labels = ['age', 'prescript', 'astigmatic', 'tearRate']
+	
 	return dataset, labels
 
 # 如果到达叶子节点仍然不属于同一类，则按多数投票进行表决
@@ -114,6 +122,30 @@ def createTree(dataset, labels):
 	return myTree
 
 
+def classify(myTree, labels, dataVect):
+	firstStr = myTree.keys()[0]
+	secondDict = myTree[firstStr]
+	featIdx = labels.index(firstStr)
+	for key in secondDict.keys():
+		if key == dataVect[featIdx]:
+			if type(secondDict[key]).__name__ == 'dict':
+				classLabel = classify(secondDict[key], labels, dataVect)
+			else:
+				classLabel = secondDict[key]
+	return classLabel 
+
+
+def storeTree(myTree, filename):
+	fw = open(filename, 'w')
+	pickle.dump(myTree, fw)
+	fw.close()
+	
+def grabTree(filename):
+	fr = open(filename)	
+	return pickle.load(fr)
+	
+
+
 dataset, labels = createDataset()
 #shannonEnt = calcShannonEnt(dataset)
 #print shannonEnt
@@ -122,8 +154,20 @@ dataset, labels = createDataset()
 #bestFeatIdx = chooseBestFeatureToSplitV2(dataset)
 #print bestFeatIdx
 #print dataset
-tree = createTree(dataset, labels);
+copyLabels = []
+for label in labels:
+	copyLabels.append(label)
+tree = createTree(dataset, copyLabels);
 print tree
+#classLabel = classify(tree, labels, [1, 0])
+#print classLabel
+#classLabel = classify(tree, labels, [1, 1])
+#print classLabel
+plotTree.createPlot(tree)
+#treeFile = 'storeTree.txt'
+#storeTree(tree, treeFile)
+#rebuildTree = grabTree(treeFile)
+#print rebuildTree
 
 
 
