@@ -18,8 +18,8 @@ class BBTQuestionSpider(Spider):
 
 
 	def parse(self, response):
-		#from scrapy.shell import inspect_response
-		#inspect_response(response, self)
+		from scrapy.shell import inspect_response
+		inspect_response(response, self)
 		
 		item = BBTQuestionItem()
 		solved_questions = response.xpath('//div[contains(@class, "section-main")]/div[@class="question-list question-list-solved"]/ul/li')
